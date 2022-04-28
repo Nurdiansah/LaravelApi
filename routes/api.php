@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ArticelController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -18,27 +19,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group([
+Route::group(['middleware' => 'jwt.verify'], function () {
 
-    'middleware' => 'api',
-    'prefix' => 'auth'
+    // auth
+    Route::group(['prefix' => 'auth'], function () {
 
-], function ($router) {
+        Route::post('login', [AuthController::class, 'login']);
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::post('refresh', [AuthController::class, 'refresh']);
+        Route::post('me', [AuthController::class, 'me']);
+    });
 
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('refresh', [AuthController::class, 'refresh']);
-    Route::post('me', [AuthController::class, 'me']);
+    // articel
+    Route::group(['prefix' => 'articel'], function () {
+
+        Route::get('', [ArticelController::class, 'index']);
+    });
 });
 
-// Route::namespace('Auth')->group(function () {
-// Route::post('register', RegisterController::class);
-// Route::post('login', LoginController::class);
-
-// Route::get('user', UserController::class);
-// });
-
-
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+Route::post('register', RegisterController::class);
